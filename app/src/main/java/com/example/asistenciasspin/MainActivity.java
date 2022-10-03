@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
+import android.net.Network;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
@@ -39,6 +40,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String DEBUG_TAG = "NetworkStatusExample";
     Button BtnSupervisor;
     Button BtnTrabajador;
     EditText IdSupervisor;
@@ -46,12 +48,12 @@ public class MainActivity extends AppCompatActivity {
     Button BtnEnviar;
     Spinner spinner;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         spinner = findViewById(R.id.spinner2);
         ArrayList<Estado> estado = new ArrayList<>();
         estado.add(new Estado("Entrada"));
@@ -95,8 +97,13 @@ public class MainActivity extends AppCompatActivity {
         BtnEnviar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ejecutarServicio("https://s-spin.com.mx/login2.php");
-
+                if(isOnline()) {
+                    Log.d(DEBUG_TAG, "NETWORK connected: TRUE");
+                    ejecutarServicio("https://s-spin.com.mx/login2.php");
+                }else {
+                    Log.d(DEBUG_TAG, "NETWORK connected: FALSE");
+                    Toast.makeText(getApplicationContext(), "ASISTENCIA NO ENVIADA, VERIFIQUE SU CONEXIÓN", Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
@@ -119,17 +126,23 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private boolean  isOnline() {
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        return (networkInfo != null && networkInfo.isConnected());
+    }
 
     private void ejecutarServicio (String URL){
         StringRequest stringRequest = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                Toast.makeText(getApplicationContext(), "NO ENVIADO", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "ASISTENCIA ENVIADA", Toast.LENGTH_LONG).show();
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getApplicationContext(), "ASISTENCIA ENVIADA", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(),"ASISTENCIA NO ENVIADA, ERROR EN EL SERVICIO", Toast.LENGTH_SHORT).show();
             }
         }) {
             //@Nullable
@@ -144,17 +157,5 @@ public class MainActivity extends AppCompatActivity {
         };
         RequestQueue requestQueue = Volley.newRequestQueue(this);
         requestQueue.add(stringRequest);
-    }
-
-    ConnectivityManager cm =
-            (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-    NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-    boolean isConnected = activeNetwork != null &&
-            activeNetwork.isConnectedOrConnecting();
-        Log.d("Respuesta",""+ isConnected);
-
-        if(isConnected) { }else{
-        Toast.makeText(getActivity(),"No hay internet",Toast.LENGTH_SHORT).show();
     }
 }
