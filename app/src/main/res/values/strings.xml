@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Asistencias Spin</string>
+    <string name="escanear_supervisor">Escanear Supervisor</string>
+    <string name="enviar_asistencia">Enviar Asistencia</string>
+    <string name="escanear_trabajador">Escanear Trabajador</string>
+    <string name="logo">Logo</string>
+</resources>
